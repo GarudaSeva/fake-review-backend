@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review AI Analyzer | Premium Review Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--bg-card);
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, textarea {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #results {
+            margin-top: 3rem;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .card-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .card-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .badge-positive { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+        .badge-negative { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+        .badge-neutral { background: rgba(245, 158, 11, 0.2); color: var(--accent-yellow); }
+        
+        .badge-real { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+        .badge-fake { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+
+        .badge-genuine { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+        .badge-suspicious { background: rgba(245, 158, 11, 0.2); color: var(--accent-yellow); }
+        .badge-bot { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Review AI System</h1>
+        <p class="subtitle">Analyze review sentiment, authenticity, and user behavior in real-time.</p>
+
+        <form id="reviewForm">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="reviewsPerDay">Reviews per Day</label>
+                    <input type="number" id="reviewsPerDay" placeholder="e.g., 5" required value="2">
+                </div>
+                <div class="input-group">
+                    <label for="accountAge">Account Age (Days)</label>
+                    <input type="number" id="accountAge" placeholder="e.g., 365" required value="120">
+                </div>
+                <div class="input-group full-width">
+                    <label for="reviewText">Review Content</label>
+                    <textarea id="reviewText" placeholder="Describe your experience here..." required>This phone is amazing and works perfectly!</textarea>
+                </div>
+            </div>
+            <button type="submit" id="submitBtn">
+                <span class="btn-text">Analyze Review</span>
+                <div class="loader" id="loader"></div>
+            </button>
+        </form>
+
+        <div id="results">
+            <div class="results-header">
+                <h2>Analysis Results</h2>
+                <div id="overallScore"></div>
+            </div>
+            <div class="result-cards">
+                <div class="card">
+                    <span class="card-label">Sentiment</span>
+                    <div id="sentimentValue" class="card-value">--</div>
+                    <div id="sentimentConf" class="card-label">Confidence: 0%</div>
+                </div>
+                <div class="card">
+                    <span class="card-label">Review Label</span>
+                    <div id="reviewLabel" class="card-value">--</div>
+                    <div id="fakeProb" class="card-label">Fake Prob: 0%</div>
+                </div>
+                <div class="card">
+                    <span class="card-label">User Status</span>
+                    <div id="userStatus" class="card-value">--</div>
+                    <span id="userBadge" class="badge">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const loader = document.getElementById('loader');
+            const resultsDiv = document.getElementById('results');
+
+            // Show loading state
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+            resultsDiv.style.display = 'none';
+
+            const payload = {
+                review: document.getElementById('reviewText').value,
+                user: {
+                    reviews_per_day: parseInt(document.getElementById('reviewsPerDay').value),
+                    account_age_days: parseInt(document.getElementById('accountAge').value)
+                }
+            };
+
+            try {
+                const response = await fetch('/add-review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResults(data);
+                } else {
+                    alert('Error: ' + (data.error || 'Something went wrong'));
+                }
+            } catch (err) {
+                alert('Connection error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                loader.style.display = 'none';
+            }
+        });
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            // Sentiment
+            const sentVal = document.getElementById('sentimentValue');
+            sentVal.innerHTML = `<span class="badge badge-${data.sentiment.sentiment}">${data.sentiment.sentiment}</span>`;
+            document.getElementById('sentimentConf').textContent = `Confidence: ${(data.sentiment.confidence * 100).toFixed(1)}%`;
+
+            // Fake Review
+            const revLab = document.getElementById('reviewLabel');
+            revLab.innerHTML = `<span class="badge badge-${data.fake_review_detection.review_label}">${data.fake_review_detection.review_label}</span>`;
+            document.getElementById('fakeProb').textContent = `Fake Prob: ${(data.fake_review_detection.fake_probability * 100).toFixed(1)}%`;
+
+            // User Status
+            const userStat = document.getElementById('userStatus');
+            const userBadg = document.getElementById('userBadge');
+            userStat.textContent = data.user_status;
+            userBadg.className = `badge badge-${data.user_status}`;
+            userBadg.textContent = data.user_status;
+            userStat.style.display = 'none'; // Use badge instead
+
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
